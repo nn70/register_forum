@@ -1,7 +1,7 @@
 
 import nodemailer from "nodemailer";
 import * as ics from "ics";
-import { Event, Attendee } from "../generated/client";
+import { Event, Attendee } from "@prisma/client";
 
 export async function sendRegistrationEmail(event: Event, attendee: Attendee) {
     // 1. Generate ICS
