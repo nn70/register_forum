@@ -456,6 +456,7 @@ export type AttendeeCreateOrConnectWithoutEventInput = {
 
 export type AttendeeCreateManyEventInputEnvelope = {
   data: Prisma.AttendeeCreateManyEventInput | Prisma.AttendeeCreateManyEventInput[]
+  skipDuplicates?: boolean
 }
 
 export type AttendeeUpsertWithWhereUniqueWithoutEventInput = {
@@ -1263,6 +1264,7 @@ export type AttendeeCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * The data used to create many Attendees.
    */
   data: Prisma.AttendeeCreateManyInput | Prisma.AttendeeCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1281,6 +1283,7 @@ export type AttendeeCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extens
    * The data used to create many Attendees.
    */
   data: Prisma.AttendeeCreateManyInput | Prisma.AttendeeCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */
