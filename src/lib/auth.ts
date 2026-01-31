@@ -1,8 +1,10 @@
 
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import prisma from "./prisma";
+import { getUserRole } from "./roles";
 
 export const authOptions: NextAuthOptions = {
     adapter: PrismaAdapter(prisma),
@@ -16,21 +18,43 @@ export const authOptions: NextAuthOptions = {
                 }
             }
         }),
+        CredentialsProvider({
+            name: "Passcode",
+            credentials: {
+                passcode: { label: "Passcode", type: "password" }
+            },
+            async authorize(credentials) {
+                if (credentials?.passcode === "8888") {
+                    // Return a mock user for the viewer
+                    return {
+                        id: "viewer-guest",
+                        name: "Guest Admin",
+                        email: "guest@example.com",
+                        role: "viewer" as const,
+                        image: null
+                    };
+                }
+                return null;
+            }
+        })
     ],
     session: {
         strategy: "jwt"
     },
     callbacks: {
         async session({ session, token }) {
-            if (session.user && token.sub) {
-                // @ts-expect-error - Adding id to session user
-                session.user.id = token.sub;
+            if (session.user) {
+                if (token.sub) {
+                    session.user.id = token.sub;
+                }
+                session.user.role = token.role || (await getUserRole(session.user.email));
             }
             return session;
         },
         async jwt({ token, user }) {
             if (user) {
                 token.sub = user.id;
+                token.role = user.role;
             }
             return token;
         }

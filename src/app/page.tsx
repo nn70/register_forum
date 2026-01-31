@@ -5,45 +5,131 @@ import prisma from "@/lib/prisma";
 export default async function Home() {
   const events = await prisma.event.findMany({
     orderBy: { startTime: 'asc' },
-    // Show all future events, or just all for now
   });
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-600 to-indigo-700 text-white p-6">
-      <h1 className="text-5xl font-extrabold mb-10 text-center drop-shadow-sm tracking-tight">
-        Upcoming Events
-      </h1>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800">
+      {/* Hero Section */}
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 opacity-20" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='30' height='30' viewBox='0 0 30 30' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='1.5' cy='1.5' r='1.5' fill='rgba(255,255,255,0.3)'%3E%3C/circle%3E%3C/svg%3E")`
+        }}></div>
 
-      <div className="grid gap-6 w-full max-w-5xl grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        {events.map(event => (
-          <Link key={event.id} href={`/events/${event.id}`} className="group block bg-white text-gray-800 p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
-            <div className="mb-4">
-              <span className="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded uppercase tracking-wide">Event</span>
-            </div>
-            <h2 className="text-2xl font-bold mb-3 group-hover:text-blue-600 transition-colors">{event.title}</h2>
-            <p className="text-gray-500 text-sm mb-6 flex items-center gap-2">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-              {new Date(event.startTime).toLocaleDateString()}
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+          <div className="text-center">
+            <h1 className="text-5xl md:text-7xl font-black text-white mb-6 tracking-tight">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-300">
+                活動報名系統
+              </span>
+            </h1>
+            <p className="text-xl text-purple-200 max-w-2xl mx-auto mb-12">
+              輕鬆報名各種精彩活動，即時接收通知，一鍵加入行事曆
             </p>
-            <div className="flex justify-between items-center text-blue-600 font-semibold mt-auto">
-              <span>Register Now</span>
-              <span className="group-hover:translate-x-1 transition-transform">&rarr;</span>
-            </div>
-          </Link>
-        ))}
-      </div>
-
-      {events.length === 0 && (
-        <div className="text-center bg-white/10 backdrop-blur-sm p-10 rounded-2xl border border-white/20">
-          <p className="text-2xl font-light">No upcoming events scheduled.</p>
+          </div>
         </div>
-      )}
-
-      <div className="mt-20">
-        <Link href="/admin/login" className="text-white/40 hover:text-white transition-colors text-sm font-medium">
-          Admin Portal
-        </Link>
       </div>
+
+      {/* Events Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+            <span className="text-3xl">🎯</span> 即將舉辦的活動
+          </h2>
+          <span className="text-purple-300 text-sm">共 {events.length} 場活動</span>
+        </div>
+
+        {events.length > 0 ? (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {events.map((event: any) => (
+              <Link
+                key={event.id}
+                href={`/events/${event.slug || event.id}`}
+                className="group relative bg-white/10 backdrop-blur-lg rounded-2xl overflow-hidden border border-white/20 hover:border-white/40 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-purple-500/20"
+              >
+                {/* Event Image */}
+                {event.imageUrl ? (
+                  <div className="h-48 overflow-hidden">
+                    <img
+                      src={event.imageUrl}
+                      alt={event.title}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                  </div>
+                ) : (
+                  <div className="h-48 bg-gradient-to-br from-purple-600/50 to-pink-600/50 flex items-center justify-center">
+                    <span className="text-6xl opacity-50">📅</span>
+                  </div>
+                )}
+
+                <div className="p-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="px-2 py-1 bg-purple-500/30 text-purple-200 text-xs rounded-full font-medium">
+                      活動
+                    </span>
+                    {new Date(event.startTime) > new Date() && (
+                      <span className="px-2 py-1 bg-green-500/30 text-green-200 text-xs rounded-full font-medium">
+                        報名中
+                      </span>
+                    )}
+                  </div>
+
+                  <h3 className="text-xl font-bold text-white mb-3 group-hover:text-purple-200 transition-colors line-clamp-2">
+                    {event.title}
+                  </h3>
+
+                  <div className="space-y-2 text-sm text-purple-200">
+                    <p className="flex items-center gap-2">
+                      <span>📅</span>
+                      {new Date(event.startTime).toLocaleDateString('zh-TW', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        weekday: 'short'
+                      })}
+                    </p>
+                    <p className="flex items-center gap-2">
+                      <span>⏰</span>
+                      {new Date(event.startTime).toLocaleTimeString('zh-TW', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </p>
+                    <p className="flex items-center gap-2">
+                      <span>📍</span>
+                      {event.location || '線上活動'}
+                    </p>
+                  </div>
+
+                  <div className="mt-6 flex items-center justify-between">
+                    <span className="text-purple-300 text-sm group-hover:text-white transition-colors">
+                      立即報名 →
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-20 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10">
+            <div className="text-6xl mb-4">📭</div>
+            <p className="text-xl text-purple-200 mb-2">目前沒有活動</p>
+            <p className="text-purple-300/60">請稍後再來查看</p>
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <footer className="border-t border-white/10 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+          <p className="text-purple-300/60 text-sm">© 2026 活動報名系統</p>
+          <Link
+            href="/admin/login"
+            className="text-purple-300/40 hover:text-purple-200 transition-colors text-sm"
+          >
+            管理員入口
+          </Link>
+        </div>
+      </footer>
     </div>
-  )
+  );
 }

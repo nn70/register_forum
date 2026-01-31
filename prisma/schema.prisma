@@ -40,11 +40,18 @@ model User {
   email         String?   @unique
   emailVerified DateTime?
   image         String?
+  phone         String?
   accounts      Account[]
   sessions      Session[]
   
-  // Custom: Role for admin access? (Simple approach: check email in code, or add role here)
-  role          String    @default("user") // "admin" or "user"
+  // Custom: Role for admin access
+  role          String    @default("user")
+  
+  // Events created by this user
+  createdEvents Event[]   @relation("EventCreator")
+  
+  // Staff applications
+  staffApplications StaffApplication[]
 }
 
 model VerificationToken {
@@ -57,16 +64,29 @@ model VerificationToken {
 
 model Event {
   id          String   @id @default(cuid())
+  slug        String?  @unique
   title       String
   description String?
   startTime   DateTime
   endTime     DateTime?
   location    String?
+  locationLat Float?
+  locationLng Float?
+  imageUrl    String?
+  isOnline    Boolean  @default(false)
+  capacity    Int?
+  
+  // Event creator
+  creatorId   String?
+  creator     User?    @relation("EventCreator", fields: [creatorId], references: [id])
   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  
+  creatorReminderSent Boolean @default(false)
 
   attendees   Attendee[]
+  staffApplications StaffApplication[]
 }
 
 model Attendee {
@@ -82,7 +102,25 @@ model Attendee {
   createdAt   DateTime @default(now())
   
   event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+}
 
-  // Combined unique constraint to prevent double registration if desired, or just handle in logic
-  // @@unique([eventId, email]) 
+model StaffApplication {
+  id          String   @id @default(cuid())
+  eventId     String
+  userId      String?
+  
+  // Applicant info
+  name        String
+  email       String
+  phone       String
+  message     String?  // Why they want to volunteer
+  
+  // Status: pending, approved, rejected
+  status      String   @default("pending")
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user        User?    @relation(fields: [userId], references: [id])
 }

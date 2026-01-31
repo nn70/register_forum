@@ -13,8 +13,8 @@ export default function CheckInForm({ eventId }: { eventId: string }) {
         return (
             <div className="text-center py-10 animate-bounce-in">
                 <div className="text-6xl mb-4">✅</div>
-                <div className="text-green-600 font-bold text-2xl">Check-in Successful!</div>
-                <p className="text-gray-600 mt-2">Welcome to the event.</p>
+                <div className="text-green-600 font-bold text-2xl">報到成功！</div>
+                <p className="text-gray-600 mt-2">歡迎參加本次活動。</p>
             </div>
         )
     }
@@ -24,13 +24,13 @@ export default function CheckInForm({ eventId }: { eventId: string }) {
             <input type="hidden" name="eventId" value={eventId} />
 
             <div>
-                <label className="block mb-2 text-sm font-medium text-gray-700">Phone Number</label>
+                <label className="block mb-2 text-sm font-medium text-gray-700">手機號碼</label>
                 <input
                     name="phone"
                     type="tel"
                     required
                     className="w-full px-4 py-3 border border-gray-300 rounded text-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    placeholder="Enter phone number"
+                    placeholder="請輸入手機號碼"
                 />
             </div>
 
@@ -41,7 +41,7 @@ export default function CheckInForm({ eventId }: { eventId: string }) {
                 disabled={isPending}
                 className="w-full bg-blue-600 text-white py-3 rounded font-bold text-lg hover:bg-blue-700 transition disabled:opacity-50"
             >
-                {isPending ? 'Checking In...' : 'Confirm Check-in'}
+                {isPending ? '報到中...' : '確認報到'}
             </button>
         </form>
     )
