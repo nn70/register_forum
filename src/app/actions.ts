@@ -177,8 +177,13 @@ export async function checkInAttendee(prevState: any, formData: FormData) {
 export async function deleteAttendee(attendeeId: string, eventId: string) {
     const session = await getServerSession(authOptions);
 
-    const adminEmails = (process.env.ADMIN_EMAILS || '').split(',');
-    const isSuper = session?.user?.email && adminEmails.includes(session.user.email);
+    const adminEmails = (process.env.ADMIN_EMAILS || '')
+        .split(',')
+        .map(e => e.trim().toLowerCase())
+        .filter(e => e.length > 0);
+
+    const userEmail = session?.user?.email?.toLowerCase();
+    const isSuper = userEmail && adminEmails.includes(userEmail);
 
     if (!isSuper) {
         throw new Error("Unauthorized: Only Super Admins can delete attendees");
