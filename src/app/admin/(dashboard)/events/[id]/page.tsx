@@ -41,12 +41,21 @@ export default async function AdminEventPage({ params }: { params: { id: string 
                         {new Date(event.startTime).toLocaleString('zh-TW')} · {event.location || '線上活動'}
                     </div>
                     {session?.user?.role !== 'viewer' && (
-                        <Link
-                            href={`/admin/events/${event.id}/edit`}
-                            className="inline-block mt-2 text-blue-600 hover:text-blue-800 text-sm"
-                        >
-                            ✏️ 編輯活動
-                        </Link>
+                        <div className="flex gap-2 mt-2">
+                            <Link
+                                href={`/admin/events/${event.id}/edit`}
+                                className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm font-medium px-3 py-1.5 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                            >
+                                ✏️ 編輯
+                            </Link>
+                            <a
+                                href={`/api/events/${event.id}/export`}
+                                target="_blank"
+                                className="inline-flex items-center gap-1 text-green-600 hover:text-green-800 text-sm font-medium px-3 py-1.5 bg-green-50 hover:bg-green-100 rounded-lg transition-colors"
+                            >
+                                📥 匯出 Excel
+                            </a>
+                        </div>
                     )}
                 </div>
                 <div className="text-center p-4 bg-white rounded-xl shadow-sm border border-slate-100">

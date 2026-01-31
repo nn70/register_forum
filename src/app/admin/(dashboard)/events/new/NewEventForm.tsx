@@ -9,6 +9,15 @@ import LocationInput from "@/components/LocationInput";
 export default function NewEventForm() {
     const [imageUrl, setImageUrl] = useState('');
 
+    // Default start time to now (local time)
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const defaultStartTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+
     return (
         <div className="max-w-2xl mx-auto">
             <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
@@ -108,6 +117,7 @@ export default function NewEventForm() {
                                 name="startTime"
                                 type="datetime-local"
                                 required
+                                defaultValue={defaultStartTime}
                                 className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                             />
                         </div>
