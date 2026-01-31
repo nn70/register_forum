@@ -66,15 +66,37 @@ export default async function AdminEventPage({ params }: { params: { id: string 
                         ← 返回儀表板
                     </Link>
                     <div className="flex items-center gap-2">
-                        <h1 className="text-3xl font-bold text-slate-800">{event.title}</h1>
+                        <Link
+                            href={`/events/${event.slug || event.id}`}
+                            target="_blank"
+                            className="group flex items-center gap-2 text-3xl font-bold text-slate-800 hover:text-blue-600 transition-colors"
+                        >
+                            {event.title}
+                            <svg className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                        </Link>
                         {isDeleted && (
                             <span className="px-2 py-1 bg-red-100 text-red-800 text-xs font-bold rounded-full">
                                 已刪除
                             </span>
                         )}
                     </div>
-                    <div className="text-slate-600 mt-1">
-                        {new Date(event.startTime).toLocaleString('zh-TW')} · {event.location || '線上活動'}
+                    <div className="text-slate-600 mt-1 flex items-center gap-2">
+                        <span>{new Date(event.startTime).toLocaleString('zh-TW')}</span>
+                        <span>·</span>
+                        {event.location ? (
+                            <a
+                                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hover:text-blue-600 hover:underline flex items-center gap-1"
+                            >
+                                📍 {event.location}
+                            </a>
+                        ) : (
+                            '線上活動'
+                        )}
                     </div>
                     {session?.user?.role !== 'viewer' && (
                         <div className="flex gap-2 mt-2 items-center">

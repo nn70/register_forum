@@ -81,7 +81,7 @@ export default function DeleteEventButton({
                 onClick={() => setIsOpen(true)}
                 className="inline-flex items-center gap-1 text-red-600 hover:text-red-800 text-sm font-medium px-3 py-1.5 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
             >
-                🗑️ 刪除
+                🗑️ 刪除活動
             </button>
 
             {isOpen && (
