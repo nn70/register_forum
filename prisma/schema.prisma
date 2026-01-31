@@ -97,6 +97,7 @@ model Attendee {
   name        String
   email       String
   phone       String
+  note        String?
   
   checkedIn   Boolean  @default(false)
   checkInTime DateTime?

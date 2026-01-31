@@ -65,6 +65,7 @@ export async function registerAttendee(prevState: any, formData: FormData) {
     const name = formData.get("name") as string;
     const email = formData.get("email") as string;
     const phone = formData.get("phone") as string;
+    const note = formData.get("note") as string;
 
     if (!eventId || !name || !email || !phone) {
         return { success: false, message: "Missing required fields" };
@@ -103,6 +104,7 @@ export async function registerAttendee(prevState: any, formData: FormData) {
                 name,
                 email,
                 phone,
+                note,
             }
         });
 
@@ -183,6 +185,14 @@ export async function deleteAttendee(attendeeId: string, eventId: string) {
         .filter(e => e.length > 0);
 
     const userEmail = session?.user?.email?.toLowerCase();
+
+    console.log("Debug deleteAttendee:", {
+        envAdmins: process.env.ADMIN_EMAILS,
+        parsedAdmins: adminEmails,
+        userEmail: userEmail,
+        sessionUser: session?.user
+    });
+
     const isSuper = userEmail && adminEmails.includes(userEmail);
 
     if (!isSuper) {

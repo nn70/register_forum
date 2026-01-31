@@ -29,9 +29,9 @@ export default function RegistrationForm({ eventId, initialUser }: RegistrationF
         }
     }, [initialUser, setEventData]);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        if (name === 'name' || name === 'email' || name === 'phone') {
+        if (name === 'name' || name === 'email' || name === 'phone' || name === 'note') {
             setEventData({ [name]: value });
         }
     };
@@ -122,6 +122,19 @@ export default function RegistrationForm({ eventId, initialUser }: RegistrationF
                     placeholder="0912345678"
                 />
                 <p className="mt-1 text-xs text-slate-500">報到時將使用此號碼確認身份</p>
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                    備註 <span className="text-gray-400 text-xs font-normal">（選填）</span>
+                </label>
+                <textarea
+                    name="note"
+                    rows={3}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all bg-white resize-none"
+                    placeholder="有什麼想告訴我們的嗎？"
+                />
             </div>
 
             {state?.message && !state.success && (
