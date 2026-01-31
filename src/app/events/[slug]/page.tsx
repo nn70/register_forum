@@ -14,7 +14,13 @@ export default async function EventPage({ params }: { params: { slug: string } }
     const { slug } = await params;
     const session = await getServerSession(authOptions);
 
-    let userData = null;
+    type UserData = {
+        name: string | null;
+        email: string | null;
+        phone: string | null;
+    } | null;
+
+    let userData: UserData = null;
     if (session?.user?.email && session.user.email !== 'guest@example.com') {
         try {
             // Try to fetch with phone field
