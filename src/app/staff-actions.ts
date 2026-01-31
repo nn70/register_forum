@@ -2,7 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { sendEmail } from "@/lib/email";
+import { sendEmail, sendStaffStatusEmail } from "@/lib/email";
 
 export async function applyForStaff(prevState: any, formData: FormData) {
     const eventId = formData.get("eventId") as string;
@@ -88,17 +88,7 @@ export async function updateStaffStatus(formData: FormData) {
 
     // Notify applicant
     try {
-        const statusText = status === 'approved' ? '已通過' : '未通過';
-        await sendEmail({
-            to: application.email,
-            subject: `[審核結果] 您的「${application.event.title}」工作人員申請${statusText}`,
-            html: `
-                <h2>工作人員申請審核結果</h2>
-                <p><strong>活動：</strong>${application.event.title}</p>
-                <p><strong>審核結果：</strong>${statusText}</p>
-                ${status === 'approved' ? '<p>恭喜您！請於活動當天提前到場報到。</p>' : '<p>感謝您的申請，期待下次有機會合作。</p>'}
-            `
-        });
+        await sendStaffStatusEmail({ ...application, email: application.email, status }, application.event);
     } catch (e) {
         console.error("Failed to send status email:", e);
     }

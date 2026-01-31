@@ -172,3 +172,57 @@ export async function sendCreatorReminderEmail(event: any, creator: any) {
         html,
     });
 }
+
+export async function sendStaffStatusEmail(application: any, event: any) {
+    // Check Config
+    const isConfigured = process.env.EMAIL_USER && process.env.EMAIL_PASS;
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
+        }
+    });
+
+    const statusText = application.status === 'approved' ? '已通過' : '未通過';
+    const subject = `[審核結果] 您的「${event.title}」工作人員申請${statusText}`;
+
+    const html = `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+            <h2 style="color: ${application.status === 'approved' ? '#16a34a' : '#dc2626'}; text-align: center;">工作人員申請審核結果</h2>
+            <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <p><strong>活動名稱：</strong>${event.title}</p>
+                <p><strong>申請狀態：</strong><span style="color: ${application.status === 'approved' ? '#16a34a' : '#dc2626'}; font-weight: bold;">${statusText}</span></p>
+                <p><strong>審核時間：</strong>${new Date().toLocaleString('zh-TW')}</p>
+            </div>
+            
+            ${application.status === 'approved'
+            ? `<p>恭喜您！您的申請已通過。</p>
+                   <p>請務必於活動當天準時到場協助。詳細的工作分配將由主辦人另行通知。</p>`
+            : `<p>感謝您對本活動的支持。</p>
+                   <p>很遺憾通知您，本次工作人員招募因名額有限或其他考量，未能錄取您的申請。</p>
+                   <p>期待下次還有機會能與您合作！</p>`
+        }
+            
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;" />
+            <p style="color: #64748b; font-size: 12px; text-align: center;">此郵件由系統自動發送，請勿直接回覆。</p>
+        </div>
+    `;
+
+    if (!isConfigured) {
+        console.log("-----------------------------------------");
+        console.log("MOCK STAFF STATUS EMAIL (Credentials not set)");
+        console.log(`To: ${application.email}`);
+        console.log(`Subject: ${subject}`);
+        console.log("HTML Preview:", html.substring(0, 100) + "...");
+        console.log("-----------------------------------------");
+        return;
+    }
+
+    await transporter.sendMail({
+        from: `"Event System" <${process.env.EMAIL_USER}>`,
+        to: application.email,
+        subject,
+        html,
+    });
+}
