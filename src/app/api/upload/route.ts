@@ -39,8 +39,8 @@ export async function POST(request: Request): Promise<NextResponse> {
             return NextResponse.json({ url: blob.url });
         }
 
-        // Fallback to local filesystem
-        else {
+        // Fallback to local filesystem (Only in Development)
+        else if (process.env.NODE_ENV === 'development') {
             const bytes = await file.arrayBuffer();
             const buffer = Buffer.from(bytes);
 
@@ -59,6 +59,8 @@ export async function POST(request: Request): Promise<NextResponse> {
             // Return local URL
             const url = `/uploads/${filename}`;
             return NextResponse.json({ url });
+        } else {
+            throw new Error("Vercel Blob storage is not configured. Please add a Blob Store to your Vercel project.");
         }
     } catch (error) {
         console.error('Upload error:', error);
