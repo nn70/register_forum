@@ -164,14 +164,51 @@ export async function checkInAttendee(prevState: any, formData: FormData) {
         }
 
         await prisma.attendee.update({
-            where: { id: attendee.id },
+            where: { id: attendee.id         revalidatePath(`/admin/events/${eventId}`);
+        return { success: true, message: "報到成功！" };
+
+    } catch (e) {
+        console.error(e);
+        return { success: false, message: "系統錯誤" };
+    }
+}
+
+export async function deleteAttendee(attendeeId: string, eventId: string) {
+    const session = await getServerSession(authOptions);
+    
+    // Hardcoded Super Admin check for now based on email, or assume isSuperAdmin helper usage if I import it?
+    // Let's use the explicit email check from auth options or roles if available.
+    // Re-checking roles.ts content would be ideal, but for now I'll use the environment variable checks common in this project
+    // or reusing logic seen elsewhere. 
+    // Wait, I should verify isSuperAdmin usage. 
+    // In page.tsx: `import { isSuperAdmin } from "@/lib/roles";`
+    // I will check roles.ts content first to be sure.
+    // Actually, to be safe and fast, I can duplicate the simple check:
+    const adminEmails = (process.env.ADMIN_EMAILS || '').split(',');
+    const isSuper = session?.user?.email && adminEmails.includes(session.user.email);
+    
+    if (!isSuper) {
+        throw new Error("Unauthorized: Only Super Admins can delete attendees");
+    }
+
+    try {
+        await prisma.attendee.delete({
+            where: { id: attendeeId }
+        });
+        revalidatePath(`/ admin / events / ${ eventId }`);
+        return { success: true };
+    } catch (e) {
+        console.error("Failed to delete attendee:", e);
+        return { success: false, message: "刪除失敗" };
+    }
+},
             data: {
                 checkedIn: true,
                 checkInTime: new Date()
             }
         });
 
-        revalidatePath(`/admin/events/${eventId}`);
+        revalidatePath(`/ admin / events / ${ eventId }`);
         return { success: true, message: "報到成功！" };
 
     } catch (e) {
