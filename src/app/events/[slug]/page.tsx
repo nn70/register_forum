@@ -30,7 +30,9 @@ export default async function EventPage({ params }: { params: { slug: string } }
                 where: { email: session.user.email },
                 select: { name: true, email: true }
             });
-            userData = { ...user, phone: null };
+            if (user) {
+                userData = { name: user.name, email: user.email, phone: null };
+            }
         }
     }
 
