@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import React from "react";
 import { canAccessAdmin, isSuperAdmin } from "@/lib/roles";
+import AdminMobileNav from "@/components/AdminMobileNav";
 
 export default async function AdminDashboardLayout({
     children,
@@ -79,6 +80,9 @@ export default async function AdminDashboardLayout({
                             >
                                 登出
                             </Link>
+
+                            {/* Mobile Navigation */}
+                            <AdminMobileNav isSuper={isSuper} />
                         </div>
                     </div>
                 </div>
