@@ -9,6 +9,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
 import DeleteEventButton from "../DeleteEventButton";
+import CopyLinkButton from "../CopyLinkButton";
 import { isSuperAdmin } from "@/lib/roles";
 
 export default async function AdminEventPage({ params }: { params: { id: string } }) {
@@ -179,6 +180,7 @@ export default async function AdminEventPage({ params }: { params: { id: string 
                     <code className="block bg-slate-50 p-3 rounded-lg text-sm break-all text-slate-600">
                         {`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/events/${event.slug || event.id}`}
                     </code>
+                    <CopyLinkButton url={`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/events/${event.slug || event.id}`} />
                 </div>
                 {session?.user?.role !== 'viewer' && (
                     <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
