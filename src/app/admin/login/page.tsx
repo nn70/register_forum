@@ -22,7 +22,7 @@ export default function AdminLoginPage() {
                 {/* Login Card */}
                 <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-8 shadow-2xl">
                     <button
-                        onClick={() => signIn('google', { callbackUrl: '/admin' })}
+                        onClick={() => signIn('google', { callbackUrl: '/admin' }, { prompt: 'consent select_account' })}
                         className="w-full flex items-center justify-center gap-3 bg-white text-gray-800 px-6 py-4 rounded-xl font-medium hover:bg-gray-50 transition-all duration-200 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] mb-6"
                     >
                         <svg className="w-6 h-6" viewBox="0 0 24 24">
