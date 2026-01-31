@@ -51,7 +51,18 @@ export default async function AdminEventPage({ params }: { params: { id: string 
                 </div>
                 <div className="text-center p-4 bg-white rounded-xl shadow-sm border border-slate-100">
                     <img src={qrCodeDataUrl} alt="報到 QR Code" className="w-28 h-28 mx-auto" />
-                    <p className="text-xs text-slate-500 mt-2">掃描報到</p>
+                    <p className="text-xs text-slate-500 mt-2 mb-3">掃描報到</p>
+                    <Link
+                        href={`/admin/print/${event.id}`}
+                        target="_blank"
+                        className="text-xs flex items-center justify-center gap-1 text-blue-600 hover:text-blue-800 font-medium py-1 px-2 hover:bg-blue-50 rounded-lg transition-colors"
+                    >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                        </svg>
+                        列印 QR Code
+                    </Link>
+                    <p className="text-xs text-red-500 mt-2 font-medium">請列印並張貼於活動現場</p>
                 </div>
             </div>
 
