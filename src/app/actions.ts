@@ -78,56 +78,55 @@ export async function registerAttendee(prevState: any, formData: FormData) {
 
         // Check if event is expired (6 hours after start time)
         const expirationTime = new Date(event.startTime).getTime() + 6 * 60 * 60 * 1000;
-        return { success: false, message: "報名已截止 (活動已結束)" };
-    }
+        if (Date.now() > expirationTime) {
+            return { success: false, message: "報名已截止 (活動已結束)" };
+        }
 
         // Check for duplicate registration (Email or Phone)
         const existingAttendee = await prisma.attendee.findFirst({
-        where: {
-            eventId,
-            OR: [
-                { email: email },
-                { phone: phone }
-            ]
-        }
-    });
+            where: {
+                eventId,
+                OR: [
+                    { email: email },
+                    { phone: phone }
+                ]
+            }
+        });
 
-    if (existingAttendee) {
-        return { success: false, message: "您已經報名過此活動（Email 或手機號碼重複）" };
+        if (existingAttendee) {
+            return { success: false, message: "您已經報名過此活動（Email 或手機號碼重複）" };
+        }
+
+        const attendee = await prisma.attendee.create({
+            data: {
+                eventId,
+                name,
+                email,
+                phone,
+            }
+        });
+
+        await sendRegistrationEmail(event, attendee);
+
+        // Update user phone number if logged in
+        const session = await getServerSession(authOptions);
+        if (session && session.user?.email && phone) {
+            try {
+                await prisma.user.update({
+                    where: { email: session.user.email },
+                    data: { phone }
+                });
+            } catch (e) {
+                // Ignore schema errors if phone field is missing in client
+                console.warn("Failed to update user phone:", e);
+            }
+        }
+
+        return { success: true, message: "" };
+    } catch (e) {
+        console.error(e);
+        return { success: false, message: "Failed to register" };
     }
-
-    const attendee = await prisma.attendee.create({
-        data: {
-            eventId,
-            name,
-            email,
-            phone,
-        }
-    });
-
-    await sendRegistrationEmail(event, attendee);
-
-    await sendRegistrationEmail(event, attendee);
-
-    // Update user phone number if logged in
-    const session = await getServerSession(authOptions);
-    if (session && session.user?.email && phone) {
-        try {
-            await prisma.user.update({
-                where: { email: session.user.email },
-                data: { phone }
-            });
-        } catch (e) {
-            // Ignore schema errors if phone field is missing in client
-            console.warn("Failed to update user phone:", e);
-        }
-    }
-
-    return { success: true, message: "" };
-} catch (e) {
-    console.error(e);
-    return { success: false, message: "Failed to register" };
-}
 }
 
 export async function checkInAttendee(prevState: any, formData: FormData) {
@@ -143,19 +142,14 @@ export async function checkInAttendee(prevState: any, formData: FormData) {
 
     try {
         // Find attendee. Assuming strict match on phone for now.
-        // If users reg with "0912-345-678" and input "0912345678", logic should align.
-        // For current MVP, trusting exact string match or simple clean.
-
-        // Try precise match first
-        let attendee = await prisma.attendee.findFirst({
+        const attendee = await prisma.attendee.findFirst({
             where: {
                 eventId,
-                phone: { equals: phone } // or just phone
+                phone: { equals: phone }
             }
         });
 
         if (!attendee) {
-            // Try searching broadly? Or just fail.
             return { success: false, message: "查無此號碼的報名資料" };
         }
 
@@ -164,7 +158,14 @@ export async function checkInAttendee(prevState: any, formData: FormData) {
         }
 
         await prisma.attendee.update({
-            where: { id: attendee.id         revalidatePath(`/admin/events/${eventId}`);
+            where: { id: attendee.id },
+            data: {
+                checkedIn: true,
+                checkInTime: new Date()
+            }
+        });
+
+        revalidatePath(`/admin/events/${eventId}`);
         return { success: true, message: "報到成功！" };
 
     } catch (e) {
@@ -175,18 +176,10 @@ export async function checkInAttendee(prevState: any, formData: FormData) {
 
 export async function deleteAttendee(attendeeId: string, eventId: string) {
     const session = await getServerSession(authOptions);
-    
-    // Hardcoded Super Admin check for now based on email, or assume isSuperAdmin helper usage if I import it?
-    // Let's use the explicit email check from auth options or roles if available.
-    // Re-checking roles.ts content would be ideal, but for now I'll use the environment variable checks common in this project
-    // or reusing logic seen elsewhere. 
-    // Wait, I should verify isSuperAdmin usage. 
-    // In page.tsx: `import { isSuperAdmin } from "@/lib/roles";`
-    // I will check roles.ts content first to be sure.
-    // Actually, to be safe and fast, I can duplicate the simple check:
+
     const adminEmails = (process.env.ADMIN_EMAILS || '').split(',');
     const isSuper = session?.user?.email && adminEmails.includes(session.user.email);
-    
+
     if (!isSuper) {
         throw new Error("Unauthorized: Only Super Admins can delete attendees");
     }
@@ -195,24 +188,48 @@ export async function deleteAttendee(attendeeId: string, eventId: string) {
         await prisma.attendee.delete({
             where: { id: attendeeId }
         });
-        revalidatePath(`/ admin / events / ${ eventId }`);
+        revalidatePath(`/admin/events/${eventId}`);
         return { success: true };
     } catch (e) {
         console.error("Failed to delete attendee:", e);
         return { success: false, message: "刪除失敗" };
     }
-},
-            data: {
-                checkedIn: true,
-                checkInTime: new Date()
+}
+
+export async function getAttendeeHistory(email: string) {
+    if (!email) return [];
+
+    try {
+        const history = await prisma.attendee.findMany({
+            where: { email },
+            include: {
+                event: {
+                    select: {
+                        id: true,
+                        title: true,
+                        startTime: true,
+                        isOnline: true,
+                        location: true
+                    }
+                }
+            },
+            orderBy: {
+                event: {
+                    startTime: 'desc'
+                }
             }
         });
 
-        revalidatePath(`/ admin / events / ${ eventId }`);
-        return { success: true, message: "報到成功！" };
-
-    } catch (e) {
-        console.error(e);
-        return { success: false, message: "系統錯誤" };
+        return history.map(record => ({
+            eventName: record.event.title,
+            eventTime: record.event.startTime,
+            checkedIn: record.checkedIn,
+            isOnline: record.event.isOnline,
+            location: record.event.location
+        }));
+    } catch (error) {
+        console.error("Failed to fetch attendee history:", error);
+        return [];
     }
 }
+

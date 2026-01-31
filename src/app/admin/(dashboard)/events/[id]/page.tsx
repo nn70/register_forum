@@ -11,6 +11,7 @@ import { authOptions } from "@/lib/auth";
 import DeleteEventButton from "../DeleteEventButton";
 import CopyLinkButton from "../CopyLinkButton";
 import DeleteAttendeeButton from "../DeleteAttendeeButton";
+import AttendeeNameCell from "../AttendeeNameCell";
 import { isSuperAdmin } from "@/lib/roles";
 
 export default async function AdminEventPage({ params }: { params: { id: string } }) {
@@ -289,22 +290,20 @@ export default async function AdminEventPage({ params }: { params: { id: string 
                                 <td className="px-6 py-4 text-sm text-slate-600">{attendee.email}</td>
                                 <td className="px-6 py-4 text-sm text-slate-600">{attendee.phone}</td>
                                 <td className="px-6 py-4">
-                                    {attendee.checkedIn ? (
-                                        <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
                                     {attendee.checkedIn ? '✅ 已報到' : '⬜ 未報到'}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                                     {new Date(attendee.createdAt).toLocaleString('zh-TW')}
                                 </td>
                                 {isSuper && (
-                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <DeleteAttendeeButton
-                                                attendeeId={attendee.id}
-                                                eventId={event.id}
-                                                attendeeName={attendee.name}
-                                            />
-                                        </td>
-                                    )}
+                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <DeleteAttendeeButton
+                                            attendeeId={attendee.id}
+                                            eventId={event.id}
+                                            attendeeName={attendee.name}
+                                        />
+                                    </td>
+                                )}
                             </tr>
                         ))}
                         {event.attendees.length === 0 && (
