@@ -78,42 +78,56 @@ export async function registerAttendee(prevState: any, formData: FormData) {
 
         // Check if event is expired (6 hours after start time)
         const expirationTime = new Date(event.startTime).getTime() + 6 * 60 * 60 * 1000;
-        if (Date.now() > expirationTime) {
-            return { success: false, message: "報名已截止 (活動已結束)" };
-        }
-
-        const attendee = await prisma.attendee.create({
-            data: {
-                eventId,
-                name,
-                email,
-                phone,
-            }
-        });
-
-        await sendRegistrationEmail(event, attendee);
-
-        await sendRegistrationEmail(event, attendee);
-
-        // Update user phone number if logged in
-        const session = await getServerSession(authOptions);
-        if (session && session.user?.email && phone) {
-            try {
-                await prisma.user.update({
-                    where: { email: session.user.email },
-                    data: { phone }
-                });
-            } catch (e) {
-                // Ignore schema errors if phone field is missing in client
-                console.warn("Failed to update user phone:", e);
-            }
-        }
-
-        return { success: true, message: "" };
-    } catch (e) {
-        console.error(e);
-        return { success: false, message: "Failed to register" };
+        return { success: false, message: "報名已截止 (活動已結束)" };
     }
+
+        // Check for duplicate registration (Email or Phone)
+        const existingAttendee = await prisma.attendee.findFirst({
+        where: {
+            eventId,
+            OR: [
+                { email: email },
+                { phone: phone }
+            ]
+        }
+    });
+
+    if (existingAttendee) {
+        return { success: false, message: "您已經報名過此活動（Email 或手機號碼重複）" };
+    }
+
+    const attendee = await prisma.attendee.create({
+        data: {
+            eventId,
+            name,
+            email,
+            phone,
+        }
+    });
+
+    await sendRegistrationEmail(event, attendee);
+
+    await sendRegistrationEmail(event, attendee);
+
+    // Update user phone number if logged in
+    const session = await getServerSession(authOptions);
+    if (session && session.user?.email && phone) {
+        try {
+            await prisma.user.update({
+                where: { email: session.user.email },
+                data: { phone }
+            });
+        } catch (e) {
+            // Ignore schema errors if phone field is missing in client
+            console.warn("Failed to update user phone:", e);
+        }
+    }
+
+    return { success: true, message: "" };
+} catch (e) {
+    console.error(e);
+    return { success: false, message: "Failed to register" };
+}
 }
 
 export async function checkInAttendee(prevState: any, formData: FormData) {
