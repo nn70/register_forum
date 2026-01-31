@@ -83,7 +83,11 @@ export default async function AdminEventPage({ params }: { params: { id: string 
                         )}
                     </div>
                     <div className="text-slate-600 mt-1 flex items-center gap-2">
-                        <span>{new Date(event.startTime).toLocaleString('zh-TW')}</span>
+                        <span>
+                            {new Date(event.startTime).toLocaleDateString('zh-TW', { year: 'numeric', month: 'numeric', day: 'numeric' })}
+                            {' '}
+                            {new Date(event.startTime).toLocaleTimeString('zh-TW', { hour12: true, hour: 'numeric', minute: 'numeric' }).replace(':', '點')}分
+                        </span>
                         <span>·</span>
                         {event.location ? (
                             <a
