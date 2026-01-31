@@ -26,37 +26,55 @@ export async function createEvent(formData: FormData) {
     const isOnline = formData.get("isOnline") === 'true';
     const capacityStr = formData.get("capacity") as string;
 
+    console.log("Create Event Request:", {
+        title, startTimeStr, isOnline,
+        locationLatStr, locationLngStr, capacityStr,
+        imageUrl
+    });
+
     if (!title || !startTimeStr) {
         throw new Error("Missing required fields");
     }
 
-    const startTime = new Date(startTimeStr);
+    try {
+        const startTime = new Date(startTimeStr);
 
-    // Generate unique slug
-    const baseSlug = generateSlug(startTime, title);
-    const slug = await ensureUniqueSlug(baseSlug, async (s) => {
-        const existing = await prisma.event.findUnique({ where: { slug: s } });
-        return existing !== null;
-    });
+        // Generate unique slug
+        const baseSlug = generateSlug(startTime, title);
+        const slug = await ensureUniqueSlug(baseSlug, async (s) => {
+            const existing = await prisma.event.findUnique({ where: { slug: s } });
+            return existing !== null;
+        });
 
-    await prisma.event.create({
-        data: {
-            slug,
-            title,
-            description,
-            location: isOnline ? '線上活動' : location,
-            startTime,
-            endTime: endTimeStr ? new Date(endTimeStr) : null,
-            imageUrl: imageUrl || null,
-            locationLat: locationLatStr ? parseFloat(locationLatStr) : null,
-            locationLng: locationLngStr ? parseFloat(locationLngStr) : null,
-            isOnline,
-            capacity: capacityStr ? parseInt(capacityStr) : null,
-        }
-    });
+        const capacityInt = capacityStr ? parseInt(capacityStr) : null;
+        const finalCapacity = (capacityInt !== null && !isNaN(capacityInt)) ? capacityInt : null;
 
+        const latFloat = locationLatStr ? parseFloat(locationLatStr) : null;
+        const lngFloat = locationLngStr ? parseFloat(locationLngStr) : null;
 
-    revalidatePath('/admin');
+        await prisma.event.create({
+            data: {
+                slug,
+                title,
+                description,
+                location: isOnline ? '線上活動' : location,
+                startTime,
+                endTime: endTimeStr ? new Date(endTimeStr) : null,
+                imageUrl: imageUrl || null,
+                locationLat: latFloat,
+                locationLng: lngFloat,
+                isOnline,
+                capacity: finalCapacity, // Use validated capacity
+                creatorId: (session.user as any).id, // Cast as any if id is not typed yet, or safe access
+            }
+        });
+
+        revalidatePath('/admin');
+    } catch (e) {
+        console.error("Create Event Failed:", e);
+        throw e; // Re-throw to show error page, but now we have logs
+    }
+
     redirect('/admin');
 }
 
