@@ -13,6 +13,12 @@ export async function POST(request: Request): Promise<NextResponse> {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    console.log("Upload Request:", {
+        hasBlobToken: !!process.env.BLOB_READ_WRITE_TOKEN,
+        nodeEnv: process.env.NODE_ENV,
+        isVercel: !!process.env.VERCEL
+    });
+
     const form = await request.formData();
     const file = form.get('file') as File;
 
@@ -39,8 +45,10 @@ export async function POST(request: Request): Promise<NextResponse> {
             return NextResponse.json({ url: blob.url });
         }
 
-        // Fallback to local filesystem (Only in Development)
-        else if (process.env.NODE_ENV === 'development') {
+        // Fallback to local filesystem (Only in Local Development)
+        // Vercel sets process.env.VERCEL = '1'
+        else if (!process.env.VERCEL) {
+            console.log("Upload: Using local filesystem");
             const bytes = await file.arrayBuffer();
             const buffer = Buffer.from(bytes);
 
