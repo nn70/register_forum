@@ -58,7 +58,7 @@ export default function RegistrationForm({ eventId, initialUser }: RegistrationF
                     <div className="flex items-center justify-between flex-wrap gap-4">
                         <div>
                             <p className="font-semibold text-purple-900">已經有帳號？</p>
-                            <p className="text-sm text-purple-700">登入以自動帶入報名資料</p>
+                            <p className="text-sm text-purple-700">登入下次即可自動帶入報名資料</p>
                         </div>
                         <button
                             type="button"
