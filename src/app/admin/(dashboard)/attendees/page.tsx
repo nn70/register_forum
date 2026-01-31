@@ -18,7 +18,7 @@ export default async function AttendeesListPage() {
                 </p>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden overflow-x-auto">
                 <table className="w-full">
                     <thead className="bg-slate-50 text-left border-b border-slate-100">
                         <tr>

@@ -3,9 +3,17 @@ import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
+import { isSuperAdmin } from "@/lib/roles";
+
 export default async function EventsListPage() {
     const session = await getServerSession(authOptions);
+    const isSuper = isSuperAdmin(session?.user?.email);
+
+    // If Super Admin, show all. If not, filtered out deleted.
+    const whereCondition = isSuper ? {} : { deletedAt: null };
+
     const events = await prisma.event.findMany({
+        where: whereCondition,
         orderBy: { startTime: 'desc' },
         include: { _count: { select: { attendees: true } } }
     });
@@ -27,7 +35,7 @@ export default async function EventsListPage() {
                 )}
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden overflow-x-auto">
                 <table className="w-full">
                     <thead className="bg-slate-50 text-left border-b border-slate-100">
                         <tr>
@@ -42,7 +50,14 @@ export default async function EventsListPage() {
                         {events.map((event: any) => (
                             <tr key={event.id} className="hover:bg-slate-50 transition-colors">
                                 <td className="px-6 py-4">
-                                    <div className="font-medium text-slate-800">{event.title}</div>
+                                    <div className="font-medium text-slate-800">
+                                        {event.title}
+                                        {event.deletedAt && (
+                                            <span className="ml-2 px-2 py-0.5 bg-red-100 text-red-800 text-xs font-bold rounded-full">
+                                                已刪除
+                                            </span>
+                                        )}
+                                    </div>
                                 </td>
                                 <td className="px-6 py-4 text-sm text-slate-600">
                                     {new Date(event.startTime).toLocaleDateString('zh-TW', {

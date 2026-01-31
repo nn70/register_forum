@@ -160,7 +160,7 @@ export default async function ParticipantsPage({
             </div>
 
             {/* Filter */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden overflow-x-auto">
                 <div className="p-4 border-b border-slate-100 flex gap-4 items-center">
                     <span className="text-sm font-medium text-slate-600">篩選：</span>
                     <a
@@ -178,7 +178,7 @@ export default async function ParticipantsPage({
                 </div>
 
                 {/* Table */}
-                <table className="w-full">
+                <table className="w-full min-w-[800px]">
                     <thead className="bg-slate-50 text-left border-b border-slate-100">
                         <tr>
                             <th className="px-6 py-4 text-sm font-semibold text-slate-600">參加者</th>

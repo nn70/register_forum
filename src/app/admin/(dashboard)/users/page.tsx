@@ -22,8 +22,8 @@ export default async function UsersPage() {
                 </p>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                <table className="w-full">
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden overflow-x-auto">
+                <table className="w-full min-w-[600px]">
                     <thead className="bg-slate-50 text-left border-b border-slate-100">
                         <tr>
                             <th className="px-6 py-4 text-sm font-semibold text-slate-600">使用者</th>
@@ -83,8 +83,8 @@ export default async function UsersPage() {
                                                 <button
                                                     type="submit"
                                                     className={`text-sm px-4 py-2 rounded-lg transition-all ${isAdmin
-                                                            ? 'bg-red-50 text-red-700 hover:bg-red-100'
-                                                            : 'bg-green-50 text-green-700 hover:bg-green-100'
+                                                        ? 'bg-red-50 text-red-700 hover:bg-red-100'
+                                                        : 'bg-green-50 text-green-700 hover:bg-green-100'
                                                         }`}
                                                 >
                                                     {isAdmin ? '撤銷管理員' : '設為管理員'}

@@ -22,12 +22,14 @@ export function EventDataProvider({ children }: { children: ReactNode }) {
         phone: ''
     });
 
-    const setEventData = (data: Partial<EventData>) => {
+    const setEventData = React.useCallback((data: Partial<EventData>) => {
         setEventDataState(prev => ({ ...prev, ...data }));
-    };
+    }, []);
+
+    const value = React.useMemo(() => ({ eventData, setEventData }), [eventData, setEventData]);
 
     return (
-        <EventDataContext.Provider value={{ eventData, setEventData }}>
+        <EventDataContext.Provider value={value}>
             {children}
         </EventDataContext.Provider>
     );

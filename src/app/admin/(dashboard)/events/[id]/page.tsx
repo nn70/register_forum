@@ -8,6 +8,9 @@ import SurveyEmailForm from "./SurveyEmailForm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
+import DeleteEventButton from "../DeleteEventButton";
+import { isSuperAdmin } from "@/lib/roles";
+
 export default async function AdminEventPage({ params }: { params: { id: string } }) {
     const { id } = await params;
     const session = await getServerSession(authOptions);
@@ -21,6 +24,32 @@ export default async function AdminEventPage({ params }: { params: { id: string 
     });
 
     if (!event) return notFound();
+
+    // Check soft delete status
+    const isDeleted = !!event.deletedAt;
+    const userEmail = session?.user?.email;
+    const isSuper = isSuperAdmin(userEmail);
+
+    // If deleted, only Super Admin can view
+    if (isDeleted && !isSuper) {
+        return notFound();
+    }
+
+    // Determine permissions
+    // We need to fetch userId to match creatorId? 
+    // Or just rely on Super Admin logic for now. 
+    // Let's assume user.id is needed for owner check.
+    // Fetch user id from email
+    let isOwner = false;
+    if (userEmail) {
+        const user = await prisma.user.findUnique({ where: { email: userEmail }, select: { id: true } });
+        if (user && user.id === event.creatorId) {
+            isOwner = true;
+        }
+    }
+
+    const canDelete = !isDeleted && (isOwner || isSuper);
+    const canRestore = isDeleted && isSuper;
 
     const checkInUrl = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/checkin/${event.id}`;
     const qrCodeDataUrl = await QRCode.toDataURL(checkInUrl);
@@ -36,25 +65,45 @@ export default async function AdminEventPage({ params }: { params: { id: string 
                     <Link href="/admin" className="text-slate-500 hover:text-slate-700 text-sm mb-2 block">
                         ← 返回儀表板
                     </Link>
-                    <h1 className="text-3xl font-bold text-slate-800">{event.title}</h1>
+                    <div className="flex items-center gap-2">
+                        <h1 className="text-3xl font-bold text-slate-800">{event.title}</h1>
+                        {isDeleted && (
+                            <span className="px-2 py-1 bg-red-100 text-red-800 text-xs font-bold rounded-full">
+                                已刪除
+                            </span>
+                        )}
+                    </div>
                     <div className="text-slate-600 mt-1">
                         {new Date(event.startTime).toLocaleString('zh-TW')} · {event.location || '線上活動'}
                     </div>
                     {session?.user?.role !== 'viewer' && (
-                        <div className="flex gap-2 mt-2">
-                            <Link
-                                href={`/admin/events/${event.id}/edit`}
-                                className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm font-medium px-3 py-1.5 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
-                            >
-                                ✏️ 編輯
-                            </Link>
-                            <a
-                                href={`/api/events/${event.id}/export`}
-                                target="_blank"
-                                className="inline-flex items-center gap-1 text-green-600 hover:text-green-800 text-sm font-medium px-3 py-1.5 bg-green-50 hover:bg-green-100 rounded-lg transition-colors"
-                            >
-                                📥 匯出 Excel
-                            </a>
+                        <div className="flex gap-2 mt-2 items-center">
+                            {!isDeleted && (
+                                <Link
+                                    href={`/admin/events/${event.id}/edit`}
+                                    className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm font-medium px-3 py-1.5 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                                >
+                                    ✏️ 編輯
+                                </Link>
+                            )}
+
+                            <DeleteEventButton
+                                eventId={event.id}
+                                eventTitle={event.title}
+                                isDeleted={isDeleted}
+                                deletedAt={event.deletedAt}
+                                canRestore={canRestore}
+                            />
+
+                            {!isDeleted && (
+                                <a
+                                    href={`/api/events/${event.id}/export`}
+                                    target="_blank"
+                                    className="inline-flex items-center gap-1 text-green-600 hover:text-green-800 text-sm font-medium px-3 py-1.5 bg-green-50 hover:bg-green-100 rounded-lg transition-colors"
+                                >
+                                    📥 匯出 Excel
+                                </a>
+                            )}
                         </div>
                     )}
                 </div>
@@ -120,11 +169,11 @@ export default async function AdminEventPage({ params }: { params: { id: string 
 
             {/* Staff Applications */}
             {event.staffApplications.length > 0 && (
-                <div className="bg-white rounded-xl shadow-sm border border-slate-100 mb-8 overflow-hidden">
+                <div className="bg-white rounded-xl shadow-sm border border-slate-100 mb-8 overflow-hidden overflow-x-auto">
                     <div className="p-6 border-b border-slate-100">
                         <h3 className="text-lg font-semibold text-slate-800">🙋 工作人員申請</h3>
                     </div>
-                    <table className="w-full">
+                    <table className="w-full min-w-[800px]">
                         <thead className="bg-slate-50 text-left">
                             <tr>
                                 <th className="px-6 py-3 text-sm font-semibold text-slate-600">姓名</th>
@@ -190,11 +239,11 @@ export default async function AdminEventPage({ params }: { params: { id: string 
             )}
 
             {/* Attendees List */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+            <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden overflow-x-auto">
                 <div className="p-6 border-b border-slate-100">
                     <h3 className="text-lg font-semibold text-slate-800">👥 報名名單</h3>
                 </div>
-                <table className="w-full">
+                <table className="w-full min-w-[800px]">
                     <thead className="bg-slate-50 text-left">
                         <tr>
                             <th className="px-6 py-3 text-sm font-semibold text-slate-600">姓名</th>

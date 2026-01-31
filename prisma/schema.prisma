@@ -84,6 +84,8 @@ model Event {
   updatedAt   DateTime @updatedAt
   
   creatorReminderSent Boolean @default(false)
+  
+  deletedAt   DateTime?
 
   attendees   Attendee[]
   staffApplications StaffApplication[]
