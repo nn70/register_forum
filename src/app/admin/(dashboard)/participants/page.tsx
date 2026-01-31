@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { canAccessAdmin } from "@/lib/roles";
+import AttendeeNameCell from "../events/AttendeeNameCell";
 
 export default async function ParticipantsPage({
     searchParams
@@ -201,7 +202,11 @@ export default async function ParticipantsPage({
                                             </div>
                                         )}
                                         <div>
-                                            <p className="font-medium text-slate-800">{p.name}</p>
+                                            <AttendeeNameCell
+                                                name={p.name}
+                                                email={p.email}
+                                                phone={p.phone}
+                                            />
                                             {p.userProfile && (
                                                 <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-100 text-blue-800">
                                                     會員

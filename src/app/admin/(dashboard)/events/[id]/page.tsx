@@ -11,7 +11,6 @@ import { authOptions } from "@/lib/auth";
 import DeleteEventButton from "../DeleteEventButton";
 import CopyLinkButton from "../CopyLinkButton";
 import DeleteAttendeeButton from "../DeleteAttendeeButton";
-import AttendeeNameCell from "../AttendeeNameCell";
 import { isSuperAdmin } from "@/lib/roles";
 
 export default async function AdminEventPage({ params }: { params: { id: string } }) {
@@ -286,21 +285,7 @@ export default async function AdminEventPage({ params }: { params: { id: string 
                     <tbody className="divide-y divide-slate-100">
                         {event.attendees.map((attendee: any) => (
                             <tr key={attendee.id} className="hover:bg-slate-50">
-                                <td className="px-6 py-4">
-                                    <div className="flex items-center">
-                                        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-sm mr-3">
-                                            {attendee.name.charAt(0)}
-                                        </div>
-                                        <div className="font-medium text-slate-900">
-                                            <AttendeeNameCell
-                                                name={attendee.name}
-                                                email={attendee.email}
-                                                phone={attendee.phone}
-                                            />
-                                            <div className="text-slate-500 text-xs mt-0.5">{attendee.email}</div>
-                                        </div>
-                                    </div>
-                                </td>
+                                <td className="px-6 py-4 font-medium text-slate-800">{attendee.name}</td>
                                 <td className="px-6 py-4 text-sm text-slate-600">{attendee.email}</td>
                                 <td className="px-6 py-4 text-sm text-slate-600">{attendee.phone}</td>
                                 <td className="px-6 py-4">
